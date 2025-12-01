@@ -1,21 +1,20 @@
 import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Main {  
-    public static Integer findMax(List<Integer> numbers) {
+    public static Integer findMin(List<Integer> numbers) {
         if (numbers == null || numbers.isEmpty()) {
             return null;
         }
         
-        Integer max = numbers.get(0);
+        Integer min = numbers.get(0);
         for (Integer num : numbers) {
-            if (num > max) {
-                max = num;
+            if (num < min) {
+                min = num;
             }
         }
-        return max;
+        return min;
     }
     public static void main(String[] args) {  
         Scanner scanner = new Scanner(System.in);
@@ -29,6 +28,6 @@ public class Main {
         for(int i=0;i<n;i++)
             numbers.add(Integer.parseInt(scanner.nextLine()));
         
-        System.out.println("Максимальное число: "+findMax(numbers));  
+        System.out.println("Минимальное число: "+findMin(numbers));  
     }  
 }  
