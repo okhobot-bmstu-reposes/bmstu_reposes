@@ -10,7 +10,7 @@ public class Triangle {
     }  
     public float getSquare()
     {
-        float p=getPerimeter();
+        float p=getPerimeter()/2;
         return (float)Math.sqrt(p * (p - a) * (p - b) * (p - c));
     }
     public float getPerimeter()
