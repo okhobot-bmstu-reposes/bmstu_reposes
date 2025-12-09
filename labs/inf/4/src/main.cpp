@@ -1,16 +1,20 @@
 #include <iostream>
+#include <book.hpp>
 #include <pqxx/pqxx> // Подключение библиотеки
 
 int main() {
     try {
         // Строка подключения к базе данных
-        std::string conninfo = "host=localhost port=5432 dbname=postgres user=postgres password=";
+        std::string conninfo = "host=localhost port=5432 dbname=library user=postgres password=301";
 
         // Устанавливаем соединение с базой данных
         pqxx::connection conn(conninfo);
 
         if (conn.is_open()) {
             std::cout << "Connected to database: " << conn.dbname() << std::endl;
+            Book b(1, 1,1,"b1","g1");
+            b.save(conn);
+            //b.load();
         } else {
             std::cerr << "Failed to connect to the database." << std::endl;
             return 1;
