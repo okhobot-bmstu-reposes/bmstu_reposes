@@ -30,45 +30,23 @@ void Book::save(pqxx::connection &conn)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Ошибка при сохранении книги: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         throw; // Пробрасываем исключение дальше
     }
 }
-Book Book::load(pqxx::connection &conn, int book_id)
+Book::Book(const pqxx::result &result, int index)
 {
     try
     {
-        // Начинаем транзакцию
-        pqxx::work txn(conn);
-
-        // SQL запрос для получения данных книги
-        std::string sql = "SELECT id, title, author_id, publication_year, genre "
-                          "FROM books WHERE id = "+std::to_string(book_id);
-
-        // Выполняем запрос
-        pqxx::result result = txn.exec(sql);
-
-        if (result.empty())
-        {
-            throw std::runtime_error("Книга с ID " + std::to_string(book_id) + " не найдена");
-        }
-
-        // Извлекаем данные из результата
-        int id = result[0]["id"].as<int>();
-        std::string title = result[0]["title"].as<std::string>();
-        int author_id = result[0]["author_id"].as<int>();
-        int publication_year = result[0]["publication_year"].as<int>();
-        std::string genre = result[0]["genre"].as<std::string>();
-
-        // Подтверждаем транзакцию
-        txn.commit();
-
-        // Создаем и возвращаем объект Book
-        return Book(id, author_id, publication_year, title, genre);
+        id = result[index]["id"].as<int>();
+        title = result[index]["title"].as<std::string>();
+        author_id = result[index]["author_id"].as<int>();
+        publication_year = result[index]["publication_year"].as<int>();
+        genre = result[index]["genre"].as<std::string>();
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Ошибка при загрузке книги: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         throw;
     }
 }
