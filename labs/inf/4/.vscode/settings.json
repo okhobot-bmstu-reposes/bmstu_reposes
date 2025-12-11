@@ -1,0 +1,26 @@
+{
+    // Глобальные настройки кодировки
+    "files.encoding": "utf8",
+    "files.autoGuessEncoding": true,
+    "files.autoSave": "afterDelay",
+
+    // Настройки редактора
+    "editor.renderControlCharacters": true,
+    "editor.renderWhitespace": "all",
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "editor.fontSize": 14,
+
+    // Кодировка для работы с файлами
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+
+    // Терминал
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "terminal.integrated.profiles.windows": {
+        "Command Prompt": {
+            "path": "cmd.exe",
+            "args": ["/K", "chcp 65001"]
+        }
+    }
+}
