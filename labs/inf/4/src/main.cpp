@@ -21,7 +21,13 @@ pqxx::result request(std::string sql, pqxx::connection &conn)
 
     return result;
 }
-
+int get_id(std::string tname, pqxx::connection &conn)
+{
+    int id = request("SELECT MAX(id) AS max_id FROM " + tname, conn)[0]["max_id"].as<int>();
+    if (id <= 0)
+        id = 1;
+    return ++id;
+}
 int main()
 {
     try
@@ -72,26 +78,17 @@ int main()
                 }
                 else if (com == "add_author")
                 {
-                    int id = request("SELECT MAX(id) AS max_id FROM authors", conn)[0]["max_id"].as<int>();
-                    if (id <= 0)
-                        id = 1;
-                    Author a(++id);
+                    Author a(get_id("authors",conn));
                     a.save(conn, std::cout);
                 }
                 else if (com == "add_book")
                 {
-                    int id = request("SELECT MAX(id) AS max_id FROM books", conn)[0]["max_id"].as<int>();
-                    if (id <= 0)
-                        id = 1;
-                    Book b(++id);
+                    Book b(get_id("books",conn));
                     b.save(conn, std::cout);
                 }
                 else if (com == "add_user")
                 {
-                    int id = request("SELECT MAX(id) AS max_id FROM users", conn)[0]["max_id"].as<int>();
-                    if (id <= 0)
-                        id = 1;
-                    User u(++id);
+                    User u(get_id("users",conn));
                     u.save(conn, std::cout);
                 }
                 else if (com == "add_borrowed")
