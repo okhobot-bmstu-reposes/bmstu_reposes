@@ -15,8 +15,8 @@ void User::save(pqxx::connection &conn, std::ostream &outp)
             txn.quote(registration_date) +
             ")";
 
-        //std::cout << "SQL запрос:" << std::endl;
-        //std::cout << sql << std::endl;
+        // std::cout << "SQL запрос:" << std::endl;
+        // std::cout << sql << std::endl;
 
         // Выполняем запрос
         txn.exec(sql);
@@ -24,7 +24,7 @@ void User::save(pqxx::connection &conn, std::ostream &outp)
         // Подтверждаем транзакцию
         txn.commit();
 
-        outp << "Пользователь "<<name<<"("<<id<<") успешно сохранен" << std::endl;
+        outp << "Пользователь " << name << "(" << id << ") успешно сохранен" << std::endl;
     }
     catch (const std::exception &e)
     {

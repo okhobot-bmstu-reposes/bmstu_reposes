@@ -13,11 +13,11 @@ void Borrowed_book::save(pqxx::connection &conn, std::ostream &outp)
             std::to_string(user_id) + ", " +
             std::to_string(book_id) + ", " +
             txn.quote(borrow_date) + ", " +
-            (return_date=="NULL"?return_date:txn.quote(return_date)) +
+            (return_date == "NULL" ? return_date : txn.quote(return_date)) +
             ")";
 
-        //std::cout << "SQL запрос:" << std::endl;
-        //std::cout << sql << std::endl;
+        // std::cout << "SQL запрос:" << std::endl;
+        // std::cout << sql << std::endl;
 
         // Выполняем запрос
         txn.exec(sql);
@@ -25,7 +25,7 @@ void Borrowed_book::save(pqxx::connection &conn, std::ostream &outp)
         // Подтверждаем транзакцию
         txn.commit();
 
-        outp << "Книга с id="<<book_id<<" успешно взята" << std::endl;
+        outp << "Книга с id=" << book_id << " успешно взята" << std::endl;
     }
     catch (const std::exception &e)
     {

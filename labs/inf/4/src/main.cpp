@@ -56,28 +56,41 @@ int main()
                 std::cin >> com;
                 if (com == "help")
                 {
-                    std::cout << "add_author <name>(one word) <birth_year>\n"
-                              << "..."
-                              << std::endl;
+                    logs << "call: " << com << "\nresult:\n";
+                    logs << "Доступные команды:\n"
+                         << "  help                         - показать это сообщение\n"
+                         << "  add_author <имя> <год_рождения>      - добавить нового автора\n"
+                         << "  add_book <название> <id_автора> <год_издания> <жанр> - добавить книгу\n"
+                         << "  add_user <имя> <дата_регистрации(YYYY-MM-DD)> - добавить пользователя\n"
+                         << "  add_borrowed <id_пользователя> <id_книги> <дата_взятия> <дата_возврата/NULL> - записать выдачу книги\n\n"
+                         << "  get_author_books <имя_автора>        - получить книги автора\n"
+                         << "  new_users                            - показать новых пользователей (за последний год)\n"
+                         << "  last_borrowed                        - показать последние выдачи (за 30 дней)\n"
+                         << "  most_popular                         - показать 3 самые популярные книги\n"
+                         << "  exit                                 - выход из программы"
+                         << std::endl;
                 }
                 else if (com == "add_author")
                 {
-                    int id=request("SELECT MAX(id) AS max_id FROM authors",conn)[0]["max_id"].as<int>();
-                    if(id<=0)id=1;
+                    int id = request("SELECT MAX(id) AS max_id FROM authors", conn)[0]["max_id"].as<int>();
+                    if (id <= 0)
+                        id = 1;
                     Author a(++id);
                     a.save(conn, std::cout);
                 }
                 else if (com == "add_book")
                 {
-                    int id=request("SELECT MAX(id) AS max_id FROM books",conn)[0]["max_id"].as<int>();
-                    if(id<=0)id=1;
+                    int id = request("SELECT MAX(id) AS max_id FROM books", conn)[0]["max_id"].as<int>();
+                    if (id <= 0)
+                        id = 1;
                     Book b(++id);
                     b.save(conn, std::cout);
                 }
                 else if (com == "add_user")
                 {
-                    int id=request("SELECT MAX(id) AS max_id FROM users",conn)[0]["max_id"].as<int>();
-                    if(id<=0)id=1;
+                    int id = request("SELECT MAX(id) AS max_id FROM users", conn)[0]["max_id"].as<int>();
+                    if (id <= 0)
+                        id = 1;
                     User u(++id);
                     u.save(conn, std::cout);
                 }
@@ -88,16 +101,17 @@ int main()
                 }
                 else if (com == "get_author_books")
                 {
-                    logs<<"call: "<<com<<"\nresult:\n";
-                    std::cin>>com;
+                    logs << "call: " << com << "\nresult:\n";
+                    std::cin >> com;
                     pqxx::result res = request(
                         "SELECT b.id, b.title FROM books b "
                         "JOIN authors a ON b.author_id = a.id "
-                        "WHERE a.name = \'"+com+"\';"
-                        ,conn);
+                        "WHERE a.name = \'" +
+                            com + "\';",
+                        conn);
 
                     for (int i = 0; i < res.size(); i++)
-                        logs << res[i]["title"].as<std::string>()<<"("<<res[i]["id"].as<std::string>() << ")\n";
+                        logs << res[i]["title"].as<std::string>() << "(" << res[i]["id"].as<std::string>() << ")\n";
                 }
                 else if (com == "new_users")
                 {
@@ -105,7 +119,7 @@ int main()
                         "SELECT COUNT(*) as user_count "
                         "FROM users WHERE registration_date >= CURRENT_DATE - INTERVAL \'1 year\';",
                         conn);
-                    logs<<"call: "<<com<<"\nresult:\n";
+                    logs << "call: " << com << "\nresult:\n";
                     if (!res.empty())
                         logs << res[0]["user_count"].as<std::string>() << "\n";
                 }
@@ -117,9 +131,9 @@ int main()
                         "JOIN books b ON bb.book_id = b.id "
                         "WHERE bb.borrow_date >= CURRENT_DATE - INTERVAL \'30 days\';",
                         conn);
-                    logs<<"call: "<<com<<"\nresult:\n";
+                    logs << "call: " << com << "\nresult:\n";
                     for (int i = 0; i < res.size(); i++)
-                        logs << res[i]["title"].as<std::string>() <<"("<<res[i]["id"].as<std::string>() << ")\n";
+                        logs << res[i]["title"].as<std::string>() << "(" << res[i]["id"].as<std::string>() << ")\n";
                 }
                 else if (com == "most_popular")
                 {
@@ -131,12 +145,12 @@ int main()
                                                "ORDER BY borrow_count DESC "
                                                "LIMIT 3;",
                                                conn);
-                    logs<<"call: "<<com<<"\nresult:\n";
+                    logs << "call: " << com << "\nresult:\n";
                     for (int i = 0; i < res.size(); i++)
-                        logs << res[i]["title"].as<std::string>() <<"("<<res[i]["id"].as<std::string>() << ")\n";
+                        logs << res[i]["title"].as<std::string>() << "(" << res[i]["id"].as<std::string>() << ")\n";
                 }
                 else
-                    logs<<"call: "<<com<<"\n";
+                    logs << "call: " << com << ";";
                 std::cout << logs.str() << std::endl;
 
                 outp.open("logs.txt", std::ios::app);
