@@ -7,7 +7,11 @@ public:
     Borrowed_book(int user_id, int book_id, std::string borrow_date, std::string return_date)
         : user_id(user_id), book_id(book_id), borrow_date(borrow_date), return_date(return_date) {}
     Borrowed_book(const pqxx::result &result, int index=0);
-    void save(pqxx::connection &conn);
+    Borrowed_book()
+    {
+        std::cin>>user_id>>book_id>>borrow_date>>return_date;
+    }
+    void save(pqxx::connection &conn, std::ostream &outp);
 
 private:
     std::string borrow_date, return_date;

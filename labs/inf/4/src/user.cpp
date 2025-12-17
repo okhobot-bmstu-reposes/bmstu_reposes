@@ -1,5 +1,5 @@
 #include <user.hpp>
-void User::save(pqxx::connection &conn)
+void User::save(pqxx::connection &conn, std::ostream &outp)
 {
     try
     {
@@ -15,8 +15,8 @@ void User::save(pqxx::connection &conn)
             txn.quote(registration_date) +
             ")";
 
-        std::cout << "SQL запрос:" << std::endl;
-        std::cout << sql << std::endl;
+        //std::cout << "SQL запрос:" << std::endl;
+        //std::cout << sql << std::endl;
 
         // Выполняем запрос
         txn.exec(sql);
@@ -24,7 +24,7 @@ void User::save(pqxx::connection &conn)
         // Подтверждаем транзакцию
         txn.commit();
 
-        std::cout << "Автор успешно сохранена" << std::endl;
+        outp << "Пользователь "<<name<<"("<<id<<") успешно сохранен" << std::endl;
     }
     catch (const std::exception &e)
     {

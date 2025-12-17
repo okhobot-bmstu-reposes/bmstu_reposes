@@ -1,5 +1,5 @@
 #include <book.hpp>
-void Book::save(pqxx::connection &conn)
+void Book::save(pqxx::connection &conn, std::ostream &outp)
 {
     try
     {
@@ -17,8 +17,8 @@ void Book::save(pqxx::connection &conn)
             txn.quote(genre) +                            // genre (экранируется!)
             ")";
 
-        std::cout << "SQL запрос:" << std::endl;
-        std::cout << sql << std::endl;
+        //std::cout << "SQL запрос:" << std::endl;
+        //std::cout << sql << std::endl;
 
         // Выполняем запрос
         txn.exec(sql);
@@ -26,7 +26,7 @@ void Book::save(pqxx::connection &conn)
         // Подтверждаем транзакцию
         txn.commit();
 
-        std::cout << "Книга успешно сохранена" << std::endl;
+        outp << "Книга "<<title<<"("<<id<<") успешно сохранена" << std::endl;
     }
     catch (const std::exception &e)
     {

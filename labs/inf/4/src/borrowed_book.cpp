@@ -1,5 +1,5 @@
 #include <borrowed_book.hpp>
-void Borrowed_book::save(pqxx::connection &conn)
+void Borrowed_book::save(pqxx::connection &conn, std::ostream &outp)
 {
     try
     {
@@ -16,8 +16,8 @@ void Borrowed_book::save(pqxx::connection &conn)
             (return_date=="NULL"?return_date:txn.quote(return_date)) +
             ")";
 
-        std::cout << "SQL запрос:" << std::endl;
-        std::cout << sql << std::endl;
+        //std::cout << "SQL запрос:" << std::endl;
+        //std::cout << sql << std::endl;
 
         // Выполняем запрос
         txn.exec(sql);
@@ -25,7 +25,7 @@ void Borrowed_book::save(pqxx::connection &conn)
         // Подтверждаем транзакцию
         txn.commit();
 
-        std::cout << "Книга успешно взята" << std::endl;
+        outp << "Книга с id="<<book_id<<" успешно взята" << std::endl;
     }
     catch (const std::exception &e)
     {

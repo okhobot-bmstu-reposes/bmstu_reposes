@@ -62,28 +62,42 @@ int main()
                 }
                 else if (com == "add_author")
                 {
+                    int id=request("SELECT MAX(id) AS max_id FROM authors",conn)[0]["max_id"].as<int>();
+                    if(id<=0)id=1;
+                    Author a(++id);
+                    a.save(conn, std::cout);
                 }
                 else if (com == "add_book")
                 {
+                    int id=request("SELECT MAX(id) AS max_id FROM books",conn)[0]["max_id"].as<int>();
+                    if(id<=0)id=1;
+                    Book b(++id);
+                    b.save(conn, std::cout);
                 }
                 else if (com == "add_user")
                 {
+                    int id=request("SELECT MAX(id) AS max_id FROM users",conn)[0]["max_id"].as<int>();
+                    if(id<=0)id=1;
+                    User u(++id);
+                    u.save(conn, std::cout);
                 }
                 else if (com == "add_borrowed")
                 {
+                    Borrowed_book bb;
+                    bb.save(conn, std::cout);
                 }
                 else if (com == "get_author_books")
                 {
                     logs<<"call: "<<com<<"\nresult:\n";
                     std::cin>>com;
                     pqxx::result res = request(
-                        "SELECT b.title FROM books b "
+                        "SELECT b.id, b.title FROM books b "
                         "JOIN authors a ON b.author_id = a.id "
-                        "WHERE a.name = \""+com+"\";"
+                        "WHERE a.name = \'"+com+"\';"
                         ,conn);
 
                     for (int i = 0; i < res.size(); i++)
-                        logs << res[i]["title"].as<std::string>() << "\n";
+                        logs << res[i]["title"].as<std::string>()<<"("<<res[i]["id"].as<std::string>() << ")\n";
                 }
                 else if (com == "new_users")
                 {
@@ -98,18 +112,18 @@ int main()
                 else if (com == "last_borrowed")
                 {
                     pqxx::result res = request(
-                        "SELECT b.title "
+                        "SELECT b.id, b.title "
                         "FROM borrowed_books bb "
                         "JOIN books b ON bb.book_id = b.id "
                         "WHERE bb.borrow_date >= CURRENT_DATE - INTERVAL \'30 days\';",
                         conn);
                     logs<<"call: "<<com<<"\nresult:\n";
                     for (int i = 0; i < res.size(); i++)
-                        logs << res[i]["title"].as<std::string>() << "\n";
+                        logs << res[i]["title"].as<std::string>() <<"("<<res[i]["id"].as<std::string>() << ")\n";
                 }
                 else if (com == "most_popular")
                 {
-                    pqxx::result res = request("SELECT b.title, "
+                    pqxx::result res = request("SELECT b.id, b.title, "
                                                "COUNT(bb.book_id) as borrow_count "
                                                "FROM books b "
                                                "JOIN borrowed_books bb ON b.id = bb.book_id "
@@ -119,7 +133,7 @@ int main()
                                                conn);
                     logs<<"call: "<<com<<"\nresult:\n";
                     for (int i = 0; i < res.size(); i++)
-                        logs << res[i]["title"].as<std::string>() << "\n";
+                        logs << res[i]["title"].as<std::string>() <<"("<<res[i]["id"].as<std::string>() << ")\n";
                 }
                 else
                     logs<<"call: "<<com<<"\n";

@@ -1,5 +1,5 @@
 #include <author.hpp>
-void Author::save(pqxx::connection &conn)
+void Author::save(pqxx::connection &conn, std::ostream &outp)
 {
     try
     {
@@ -15,8 +15,8 @@ void Author::save(pqxx::connection &conn)
             std::to_string(birth_year) +
             ")";
 
-        std::cout << "SQL запрос:" << std::endl;
-        std::cout << sql << std::endl;
+        //std::cout << "SQL запрос:" << std::endl;
+        //std::cout << sql << std::endl;
 
         // Выполняем запрос
         txn.exec(sql);
@@ -24,7 +24,7 @@ void Author::save(pqxx::connection &conn)
         // Подтверждаем транзакцию
         txn.commit();
 
-        std::cout << "Автор успешно сохранена" << std::endl;
+        outp << "Автор "<<name<<"("<<id<<") успешно сохранен" << std::endl;
     }
     catch (const std::exception &e)
     {
