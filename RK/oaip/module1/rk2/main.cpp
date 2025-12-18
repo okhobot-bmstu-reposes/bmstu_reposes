@@ -1,227 +1,292 @@
 #include <iostream>
 #include <vector>
-#include <cstring>
-#include <cmath>
+#include <map>
 #include <fstream>
+#include <algorithm>
 #include <memory>
-#define fname "data.txt"
-using namespace std;
+#include <sstream>
+
 class Animal
 {
-public:
-    virtual void display() const {}
-
 protected:
-    string name;
-    vector<string> notes;
-    Animal(){}
-    Animal(string name) : name(name) {};
-    void parse_notes(string data)
+    std::vector<std::string> health_events;
+    std::string name;
+    std::string species;
+    int age;
+
+    void display_health_events(std::ostream &outp) const
     {
-        string tmp = "";
-        for (int i = 0; i < data.size(); i++)
-            if (data[i] == ';')
+        if (!health_events.empty())
+        {
+            outp << ", events: ";
+            for (int i = 0; i < health_events.size(); i++)
             {
-                notes.push_back(tmp);
+                if (i > 0)
+                    outp << ", ";
+                outp << health_events[i];
+            }
+        }
+    }
+    void load_health_events(std::ifstream &f)
+    {
+        std::string line, tmp = "";
+        std::getline(f, line);
+
+        for (int i = 0; i < line.size(); i++)
+        {
+            if (line[i] == '|')
+            {
+                health_events.push_back(tmp);
                 tmp = "";
             }
+
             else
-                tmp += data[i];
-        // for (int i = 0; i < notes.size(); i++)std::cout<<notes[i]<<std::endl;
+                tmp += line[i];
+        }
+        health_events.push_back(tmp);
     }
-void save_vars(int var_count, string prefix)
+    void save_health_events(std::ofstream &f)
     {
-        ofstream f(fname);
-        f<<prefix<<";\n";
-        for (int i = 0; i < var_count; i++)
-            f << get_var(i) << ";";
-        f<<"|";
-        for (int i = 0; i < notes.size(); i++)
-            f<<notes[i]<<";";
-        f<<"|"<< std::endl;
-        f.close();
+        for (int i = 0; i < health_events.size(); i++)
+        {
+            if (i > 0)
+                f << "|";
+            f << health_events[i];
+        }
     }
+
 public:
-    virtual string get_var(unsigned int index)
-    {
-        switch (index)
-        {
-        case 0:
-            return name;
-            break;
+    Animal(std::string n, std::string s, int a)
+        : name(n), species(s), age(a) {}
+    Animal() {}
 
-        default:
-            std::cout << "error: no such index" << std::endl;
-            return "";
-            break;
-        }
-    }
-    virtual void set_var(unsigned int index, string val)
+    virtual void display(std::ostream &outp) const
     {
-        switch (index)
-        {
-        case 0:
-            name = val;
-            break;
+        outp << name << " (" << species << "), " << age << " years";
+        display_health_events(outp);
+        outp << std::endl;
+    }
+    virtual void load_from_file(std::ifstream &f) {}
+    virtual void save_to_file(std::ofstream &f) {}
 
-        default:
-            std::cout << "error: no such index" << std::endl;
-            break;
-        }
-    }
-    void add_note(string note)
-    {
-        notes.push_back(note);
-    }
-    void remove_note(unsigned int index)
-    {
-        notes.erase(notes.begin()+index);
-    }
+    std::string get_name() const { return name; }
+    std::string get_species() const { return species; }
+    int get_age() const { return age; }
+    const std::vector<std::string> &get_health_events() const { return health_events; }
+    std::vector<std::string> &get_health_events() { return health_events; }
 
-    
-    void parse(string data)
-    {
-        string tmp = "";
-        unsigned int var_index = 0;
-        for (int i = 0; i < data.size(); i++)
-            if (data[i] == ';')
-            {
-                set_var(var_index, tmp);
-                tmp = "";
-                var_index++;
-            }
-            else if (data[i] == '|')
-                parse_notes(data.substr(i + 1, data.find("|", i + 1)));
-            else tmp+=data[i];
-    }
+    void set_name(const std::string &new_name) { name = new_name; }
+    void set_species(const std::string &new_species) { species = new_species; }
+    void set_age(int new_age) { age = new_age; }
+    void set_health_events(const std::vector<std::string> &new_events) { health_events = new_events; }
+
+    void add_event(std::string event) { health_events.push_back(event); }
+    const std::vector<std::string> &get_events() const { return health_events; }
 };
+
 class Bird : public Animal
 {
-    string wingspan;
+private:
+    double wingspan;
 
 public:
-    Bird(){}
-    Bird(string name, int wingspan) : wingspan(to_string(wingspan)), Animal(name) {}
-    void display() const override
-    {
-        cout << "Bird;\nname: " << name << "; wingspan: " << wingspan << ";\nnotes:\n";
-        for (int i = 0; i < notes.size(); i++)
-            cout << notes[i] << "; ";
-        cout << std::endl;
-    }
-    virtual string get_var(unsigned int index)
-    {
-        switch (index)
-        {
-        case 0:
-            return name;
-            break;
-        case 1:
-            return wingspan;
-            break;
+    Bird(std::string n, std::string s, int a,
+         double w)
+        : Animal(n, s, a), wingspan(w) {}
+    Bird() {}
 
-        default:
-            std::cout << "error: no such index" << std::endl;
-            return "";
-            break;
-        }
-    }
-    virtual void set_var(unsigned int index, string val)
-    {
-        switch (index)
-        {
-        case 0:
-            name = val;
-            break;
-        case 1:
-            wingspan = val;
-            break;
+    double get_wingspan() const { return wingspan; }
+    void set_wingspan(double new_wingspan) { wingspan = new_wingspan; }
 
-        default:
-            std::cout << "error: no such index" << std::endl;
-            break;
-        }
-    }
-    void save()
+    void display(std::ostream &outp) const override
     {
-        save_vars(2,"Bird");
+        outp << "Bird: " << get_name() << " (" << get_species() << "), " << get_age()
+             << " years, wingspan: " << wingspan;
+        display_health_events(outp);
+        outp << std::endl;
+    }
+    void load_from_file(std::ifstream &f) override
+    {
+        std::string tmp;
+        std::string name;
+        std::string species;
+
+        std::getline(f, name, ';');
+        set_name(name);
+        std::getline(f, species, ';');
+        set_species(species);
+        std::getline(f, tmp, ';');
+        set_age(std::stoi(tmp));
+        std::getline(f, tmp, ';');
+        wingspan = std::stod(tmp);
+
+        load_health_events(f);
+    }
+    void save_to_file(std::ofstream &f) override
+    {
+        f << "Bird;" << get_name() << ";" << get_species() << ";" << get_age()
+          << ";" << wingspan << ";";
+        save_health_events(f);
     }
 };
 
 class Mammal : public Animal
 {
-    string msize;
+private:
+    std::string fur_type;
 
 public:
-    Mammal(){}
-    Mammal(string name, int msize) : msize(to_string(msize)), Animal(name) {}
-    void display() const override
-    {
-        cout << "Mammal;\nname: " << name << "; size: " << msize << ";\nnotes:\n";
-        for (int i = 0; i < notes.size(); i++)
-            cout << notes[i] << "; ";
-        cout << std::endl;
-    }
-    virtual string get_var(unsigned int index)
-    {
-        switch (index)
-        {
-        case 0:
-            return name;
-            break;
-        case 1:
-            return msize;
-            break;
+    Mammal(std::string n, std::string s, int a,
+           std::string fur)
+        : Animal(n, s, a), fur_type(fur) {}
+    Mammal() {}
 
-        default:
-            std::cout << "error: no such index" << std::endl;
-            return "";
-            break;
-        }
-    }
-    virtual void set_var(unsigned int index, string val)
-    {
-        switch (index)
-        {
-        case 0:
-            name = val;
-            break;
-        case 1:
-            msize = val;
-            break;
+    std::string get_fur_type() const { return fur_type; }
+    void set_fur_type(const std::string &new_fur_type) { fur_type = new_fur_type; }
 
-        default:
-            std::cout << "error: no such index" << std::endl;
-            break;
-        }
-    }
-    void save()
+    void display(std::ostream &outp) const override
     {
-        save_vars(2,"Mammal");
+        outp << "Mammal: " << get_name() << " (" << get_species() << "), " << get_age()
+             << " years, fur: " << fur_type;
+        display_health_events(outp);
+        outp << std::endl;
+    }
+    void load_from_file(std::ifstream &f) override
+    {
+        std::string tmp;
+        std::string name;
+        std::string species;
+
+        std::getline(f, name, ';');
+        set_name(name);
+        std::getline(f, species, ';');
+        set_species(species);
+        std::getline(f, tmp, ';');
+        set_age(std::stoi(tmp));
+        std::getline(f, fur_type, ';');
+
+        load_health_events(f);
+    }
+    void save_to_file(std::ofstream &f) override
+    {
+        f << "Mammal;" << get_name() << ";" << get_species() << ";" << get_age()
+          << ";" << fur_type << ";";
+        save_health_events(f);
     }
 };
 
+std::vector<std::shared_ptr<Animal>> load_animals(std::string file_name)
+{
+    std::vector<std::shared_ptr<Animal>> animals;
+    std::ifstream input_file(file_name);
+    std::string type;
+
+    while (std::getline(input_file, type, ';'))
+    {
+        std::shared_ptr<Animal> animal;
+        if (type == "Bird")
+        {
+            animal = std::make_shared<Bird>();
+            animal->load_from_file(input_file);
+        }
+        else if (type == "Mammal")
+        {
+            animal = std::make_shared<Mammal>();
+            animal->load_from_file(input_file);
+        }
+        animals.push_back(animal);
+    }
+
+    input_file.close();
+    return animals;
+}
+
+void modify_animal(Animal *animal, std::string new_species, int new_age, std::string event)
+{
+    animal->set_species(new_species);
+    animal->set_age(new_age);
+    animal->add_event(event);
+}
+
 int main()
 {
-    vector<shared_ptr<Animal>> animals;
-    string com="";
-    do
-    {
-        cin>>com;
-        if(com=="load")
-        {
-            ifstream f(fname);
-            while(std::getline(f, com))
-            {
-                int prefix_index=com.find(";");
-                string prefix=com.substr(0,prefix_index);
-                if(prefix=="Bird")
-                animals.push_back(make_shared<Bird>());
-                animals[animals.size()-1]->parse(com.substr(prefix_index));
-            }
-            f.close();
-        }
-    } while (com!="exit");
-    
+    std::vector<std::shared_ptr<Animal>> animals = load_animals("animals.txt");
+
+    // Вывод всех животных
+    std::cout << "All animals:" << std::endl;
+    for (auto it = animals.begin(); it != animals.end(); it++)
+        (*it)->display(std::cout);
+
+    std::cout << "\nModifying first animal..." << std::endl;
+    modify_animal(animals[0].get(), "NewSpecies", 10, "checkup");
+    animals[0]->display(std::cout);
+
+    // Подсчет млекопитающих старше 5 лет
+    auto old_mammals = std::count_if(animals.begin(), animals.end(),
+                                     [](const auto &animal)
+                                     {
+                                         auto mammal = dynamic_cast<Mammal *>(animal.get());
+                                         return mammal && mammal->get_age() > 5;
+                                     });
+    std::cout << "\nMammals older than 5: " << old_mammals << std::endl;
+
+    // Сортировка по имени
+    std::sort(animals.begin(), animals.end(),
+              [](const auto &animal_a, const auto &animal_b)
+              {
+                  return animal_a->get_name() < animal_b->get_name();
+              });
+
+    std::cout << "\nSorted by name:" << std::endl;
+    for (const auto &animal : animals)
+        animal->display(std::cout);
+
+    auto fastest_bird = *std::max_element(animals.begin(), animals.end(),
+                                         [](const auto &animal_a, const auto &animal_b)
+                                         {
+                                             auto bird_a = dynamic_cast<Bird *>(animal_a.get());
+                                             auto bird_b = dynamic_cast<Bird *>(animal_b.get());
+                                             double speed_a = bird_a ? bird_a->get_wingspan() : 0;
+                                             double speed_b = bird_b ? bird_b->get_wingspan() : 0;
+                                             return speed_a < speed_b;
+                                         });
+    std::cout << "\nFastest bird(by wingspan): " << std::endl;
+    fastest_bird->display(std::cout);
+
+    // Сортировка по возрасту и вывод старше 5
+    std::sort(animals.begin(), animals.end(),
+              [](const auto &animal_a, const auto &animal_b)
+              {
+                  return animal_a->get_age() < animal_b->get_age();
+              });
+
+    std::cout << "\nAnimals older than 5:" << std::endl;
+    for (const auto &animal : animals)
+        if (animal->get_age() > 5)
+            animal->display(std::cout);
+
+    // Подсчет по виду
+    std::map<std::string, int> species_count;
+    for (const auto &animal : animals)
+        species_count[animal->get_species()]++;
+
+    std::cout << "\nSpecies count:" << std::endl;
+    for (const auto &[species, count] : species_count)
+        std::cout << species << ": " << count << std::endl;
+
+    // Поиск вакцинированных
+    std::vector<std::shared_ptr<Animal>> vaccinated_animals;
+    std::copy_if(animals.begin(), animals.end(),
+                 std::back_inserter(vaccinated_animals),
+                 [](const auto &animal)
+                 {
+                     const auto &events = animal->get_events();
+                     return std::find(events.begin(), events.end(), "vaccinated") != events.end();
+                 });
+
+    std::cout << "\nVaccinated animals:" << std::endl;
+    for (const auto &animal : vaccinated_animals)
+        animal->display(std::cout);
+
     return 0;
 }
