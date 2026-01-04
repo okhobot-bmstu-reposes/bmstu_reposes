@@ -1,0 +1,6 @@
+Bird;Eagle;Predator;5;2.1;vaccinated|wing clipping
+Bird;Parrot;Tropical;2;0.6;checkup
+Mammal;Dog;Domestic;4;Short-15;vaccinated|dental cleaning
+Mammal;Cat;Domestic;3;Long-5;checkup
+Bird;Falcon;Predator;6;2.5;wing clipping|vaccinated
+Mammal;Horse;Farm;7;Short-450;shoeing|vaccinated
