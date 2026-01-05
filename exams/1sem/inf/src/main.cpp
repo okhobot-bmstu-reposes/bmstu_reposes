@@ -88,9 +88,29 @@ void admin_com()
             std::cout << "Введите id заказа" << std::endl;
             std::cin >> id;
             auto history = dbConn->executeQuery("SELECT getOrderStatusHistory(" + std::to_string(id) + ");");
-            std::cout << "(old_status, new_status, changed_at(date time), changed_by)" << std::endl;
+            std::cout << "*(old_status, new_status, changed_at(date time), changed_by)*" << std::endl;
             for (auto &line : history)
                 std::cout << line["getOrderStatusHistory"].as<std::string>() << std::endl;
+            break;
+        }
+        case 8:
+        {
+            int id;
+            std::string new_status;
+            std::cout << "Введите id пользователя" << std::endl;
+            std::cin >> id;
+            auto history = dbConn->executeQuery("SELECT getAuditLogByUser(" + std::to_string(id) + ");");
+            std::cout << "*(entity_type, entity_id, operation, changed_at(date time))*" << std::endl;
+            for (auto &line : history)
+                std::cout << line["getAuditLogByUser"].as<std::string>() << std::endl;
+            break;
+        }
+        case 9:
+        {
+            auto history = dbConn->executeQuery("SELECT generateCSVReport(1);");
+            std::ofstream fout("history.csv");
+            fout<<history[0]["generateCSVReport"].as<std::string>();
+            fout.close();
             break;
         }
 

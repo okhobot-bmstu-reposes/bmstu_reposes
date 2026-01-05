@@ -64,3 +64,59 @@ RETURNS TABLE(
     WHERE performed_by = $1
     ORDER BY performed_at DESC;
 $$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION generateCSVReport(p_admin_user_id INTEGER)
+RETURNS TEXT AS $$
+DECLARE
+    v_csv_content TEXT;
+    v_is_admin BOOLEAN;
+BEGIN
+    -- Проверка админа
+    SELECT role = 'admin' INTO v_is_admin
+    FROM users WHERE user_id = p_admin_user_id;
+    
+    IF NOT v_is_admin THEN
+        RAISE EXCEPTION 'Доступ запрещен. Только администраторы могут генерировать отчеты.';
+    END IF;
+    
+    -- Формируем CSV (используем отдельные подзапросы чтобы избежать дублирования)
+    SELECT 
+        'user_id,user_name,user_role,total_orders,total_spent,status_changes,audit_actions' || E'\n' ||
+        
+        STRING_AGG(
+            user_id::TEXT || ',' ||
+            '"' || REPLACE(user_name, '"', '""') || '",' ||
+            user_role || ',' ||
+            total_orders::TEXT || ',' ||
+            ROUND(total_spent, 2)::TEXT || ',' ||
+            status_changes::TEXT || ',' ||
+            audit_actions::TEXT,
+            E'\n'
+        ORDER BY total_spent DESC)
+        
+    INTO v_csv_content
+    
+    FROM (
+        SELECT 
+            u.user_id,
+            u.name as user_name,
+            u.role as user_role,
+            
+            -- Заказы пользователя
+            (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.user_id) as total_orders,
+            (SELECT COALESCE(SUM(total_price), 0) FROM orders o WHERE o.user_id = u.user_id) as total_spent,
+            
+            -- Изменения статусов (где пользователь был инициатором)
+            (SELECT COUNT(*) FROM order_status_history osh WHERE osh.changed_by = u.user_id) as status_changes,
+            
+            -- Действия в аудите
+            (SELECT COUNT(*) FROM audit_log al WHERE al.performed_by = u.user_id) as audit_actions
+            
+        FROM users u
+    ) as report_data;
+    
+    
+    RETURN v_csv_content;
+END;
+$$ LANGUAGE plpgsql;
