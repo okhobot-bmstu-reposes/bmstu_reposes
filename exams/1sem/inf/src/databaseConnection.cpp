@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <databaseConnection.hpp>
 
 // Конструктор с параметрами подключения
 DatabaseConnection::DatabaseConnection(const std::string &connectionString)
@@ -23,13 +24,14 @@ DatabaseConnection::DatabaseConnection(const std::string &connectionString)
 // Выполнение запроса с возвратом результата
 pqxx::result DatabaseConnection::executeQuery(const std::string &sql)
 {
+    pqxx::result result;
     try
     {
         // Начинаем транзакцию
-        pqxx::work txn(conn);
+        pqxx::work txn(*conn);
 
         // Выполняем запрос
-        pqxx::result result = txn.exec(sql);
+        result = txn.exec(sql);
 
         // Подтверждаем транзакцию
         txn.commit();
@@ -122,21 +124,15 @@ std::string DatabaseConnection::getTransactionStatus() const
 }
 
 // Деструктор
-~DatabaseConnection::DatabaseConnection()
+DatabaseConnection::~DatabaseConnection()
 {
-    try
+
+    if (transaction)
     {
-        if (transaction)
-        {
-            transaction->abort();
-        }
-        if (conn && conn->is_open())
-        {
-            conn->disconnect();
-        }
+        transaction->abort();
     }
-    catch (...)
+    if (conn && conn->is_open())
     {
-        // Игнорируем ошибки в деструкторе
+        conn->close();
     }
 }

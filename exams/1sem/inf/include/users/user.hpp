@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <memory>
 #include <pqxx/pqxx>
@@ -11,9 +13,9 @@ public:
     void createOrder() { orders.push_back(std::make_shared<Order>()); }
     void viewOrderStatus(int orderId)
     {
-        std::cout<<dbConn->executeQuery("SELECT status FROM orders WHERE order_id=" + std::to_string(orderId) + ";")[0]["status"]<<std::endl;
+        std::cout<<dbConn->executeQuery("SELECT status FROM orders WHERE order_id=" + std::to_string(orderId) + ";")[0]["status"].as<std::string>()<<std::endl;
     }
-    void cancelOrder(int orderId);
+    void cancelOrder(int orderId)
     {
         dbConn->executeNonQuery("UPDATE orders SET status = 'canceled' WHERE order_id=" + std::to_string(orderId) + ";");
     }

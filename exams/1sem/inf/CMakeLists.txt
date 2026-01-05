@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(lab4)
+project(inf_ex_1sem)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,17 +14,17 @@ file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEADERS "include/*.hpp")
 
 find_package(libpqxx REQUIRED)
-add_executable(lab4 ${SOURCES} ${HEADERS})
+add_executable(inf_ex_1sem ${SOURCES} ${HEADERS})
 
-target_include_directories(lab4 PRIVATE include)
-target_link_libraries(lab4 PRIVATE libpqxx::pqxx)
+target_include_directories(inf_ex_1sem PRIVATE include)
+target_link_libraries(inf_ex_1sem PRIVATE libpqxx::pqxx)
 
 set(CMAKE_CXX_STANDARD 17)
 
 
-add_custom_command(TARGET lab4 POST_BUILD
+add_custom_command(TARGET inf_ex_1sem POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/vcpkg/installed/x64-windows/bin/"
-    "$<TARGET_FILE_DIR:lab4>"
+    "$<TARGET_FILE_DIR:inf_ex_1sem>"
     COMMENT "Copying all DLLs from vcpkg"
 )

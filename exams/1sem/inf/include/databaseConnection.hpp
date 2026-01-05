@@ -1,3 +1,5 @@
+#pragma once
+
 #include <pqxx/pqxx>
 #include <vector>
 #include <string>
@@ -11,7 +13,7 @@ private:
 
 public:
     // Конструктор с параметрами подключения
-    DatabaseConnection(const std::string &connectionString)
+    DatabaseConnection(const std::string &connectionString);
 
     // Выполнение запроса с возвратом результата
     pqxx::result executeQuery(const std::string &sql);

@@ -1,11 +1,23 @@
+#pragma once
 #include <iostream>
 #include <memory>
 #include <pqxx/pqxx>
+#include <algorithm>
 
 class OrderItem
 {
-    public:
-    private:
+public:
+    OrderItem(int product_id, unsigned int quantity, float price) : product_id(product_id), quantity(quantity), price(price) {}
+    std::string getJSON()
+    {
+        return "{\"product_id\": " + std::to_string(product_id) + ", \"quantity\": " + std::to_string(quantity) + "}";
+    }
+    float getPrice()
+    {
+        return price;
+    }
+
+private:
     int order_item_id, order_id, product_id;
     unsigned int quantity;
     float price;
@@ -14,7 +26,24 @@ class OrderItem
 class Order
 {
     std::vector<std::shared_ptr<OrderItem>> orderItems;
-    public:
-    void addOrderItem(std::shared_ptr<OrderItem> item);
-    void removeOrderItem(unsigned int index);
+
+public:
+    int getTotalPrice()
+    {
+        return std::accumulate(orderItems.begin(), orderItems.end(), 0,
+                               [](int total, const std::shared_ptr<OrderItem> &item)
+                               {
+                                   return total + item->getPrice();
+                               });
+    }
+    void addOrderItem(std::shared_ptr<OrderItem> item) { orderItems.push_back(item); }
+    void removeOrderItem(unsigned int index) { orderItems.erase(orderItems.begin() + index); }
+    std::string makeJSON()
+    {
+        std::string json = "[\n";
+        for (int i = 0; i < orderItems.size(); i++)
+            json += (i > 0 ? ",\n" : "\n") + orderItems[i]->getJSON();
+        json += "]";
+        return json;
+    }
 };
