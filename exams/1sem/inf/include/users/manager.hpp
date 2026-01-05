@@ -9,6 +9,7 @@
 class Manager : public User
 {
 public:
+    Manager(std::shared_ptr<DatabaseConnection> a_dbConn) : User(a_dbConn) {}
     void approveOrder(int id)
     {
         dbConn->executeNonQuery("CALL updateOrderStatus(" + std::to_string(id) + ", \'completed\', 1);");

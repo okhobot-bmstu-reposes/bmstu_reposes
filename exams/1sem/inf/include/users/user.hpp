@@ -13,14 +13,14 @@ public:
     void createOrder() { orders.push_back(std::make_shared<Order>()); }
     void viewOrderStatus(int orderId)
     {
-        std::cout<<dbConn->executeQuery("SELECT status FROM orders WHERE order_id=" + std::to_string(orderId) + ";")[0]["status"].as<std::string>()<<std::endl;
+        std::cout<<dbConn->executeQuery("SELECT getOrderStatus(" + std::to_string(orderId) + ")")[0]["getOrderStatus"].as<std::string>()<<std::endl;
     }
     void cancelOrder(int orderId)
     {
         dbConn->executeNonQuery("UPDATE orders SET status = 'canceled' WHERE order_id=" + std::to_string(orderId) + ";");
     }
 
-    User(std::shared_ptr<DatabaseConnection> a_dbConn) { dbConn = a_dbConn; }
+    User(std::shared_ptr<DatabaseConnection> a_dbConn) { dbConn = a_dbConn;}
 
 protected:
     std::string name, email, role, password_hash;

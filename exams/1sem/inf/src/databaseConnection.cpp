@@ -1,7 +1,7 @@
 #include <pqxx/pqxx>
 #include <vector>
 #include <string>
-#include <stdexcept>
+#include <iostream>
 #include <databaseConnection.hpp>
 
 // Конструктор с параметрами подключения
@@ -12,12 +12,12 @@ DatabaseConnection::DatabaseConnection(const std::string &connectionString)
         conn = std::make_unique<pqxx::connection>(connectionString);
         if (!conn->is_open())
         {
-            throw std::runtime_error("Не удалось подключиться к базе данных");
+            std::cerr<<("Не удалось подключиться к базе данных");
         }
     }
     catch (const std::exception &e)
     {
-        throw std::runtime_error(std::string("Ошибка подключения: ") + e.what());
+        std::cerr<<(std::string("Ошибка подключения: ") + e.what());
     }
 }
 
@@ -28,17 +28,18 @@ pqxx::result DatabaseConnection::executeQuery(const std::string &sql)
     try
     {
         // Начинаем транзакцию
-        pqxx::work txn(*conn);
+        beginTransaction();
 
         // Выполняем запрос
-        result = txn.exec(sql);
+        result = transaction->exec(sql);
 
         // Подтверждаем транзакцию
-        txn.commit();
+        commitTransaction();
     }
     catch (const std::exception &e)
     {
-        throw std::runtime_error(std::string("Ошибка запроса: ") + e.what());
+        std::cerr<<(std::string("Ошибка запроса: ") + e.what())<<std::endl;
+        rollbackTransaction();
     }
 
     return result;
@@ -49,13 +50,14 @@ void DatabaseConnection::executeNonQuery(const std::string &sql)
 {
     try
     {
-        pqxx::work work(*conn);
-        work.exec(sql);
-        work.commit();
+        beginTransaction();
+        transaction->exec(sql);
+        commitTransaction();
     }
     catch (const std::exception &e)
     {
-        throw std::runtime_error(std::string("Ошибка выполнения: ") + e.what());
+        std::cerr<<(std::string("Ошибка выполнения: ") + e.what())<<std::endl;
+        rollbackTransaction();
     }
 }
 
@@ -64,7 +66,7 @@ void DatabaseConnection::beginTransaction()
 {
     if (transaction)
     {
-        throw std::runtime_error("Транзакция уже начата");
+        std::cerr<<("Транзакция уже начата");
     }
     transaction = std::make_unique<pqxx::work>(*conn);
 }
@@ -74,7 +76,7 @@ void DatabaseConnection::commitTransaction()
 {
     if (!transaction)
     {
-        throw std::runtime_error("Нет активной транзакции");
+        std::cerr<<("Нет активной транзакции");
     }
     transaction->commit();
     transaction.reset();
@@ -85,7 +87,7 @@ void DatabaseConnection::rollbackTransaction()
 {
     if (!transaction)
     {
-        throw std::runtime_error("Нет активной транзакции");
+        std::cerr<<("Нет активной транзакции");
     }
     transaction->abort();
     transaction.reset();
