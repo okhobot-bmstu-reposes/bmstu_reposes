@@ -84,46 +84,26 @@ $$;
 CREATE OR REPLACE PROCEDURE updateOrderStatus(
     p_order_id INTEGER,
     p_new_status VARCHAR,
-    p_user_id INTEGER
+    p_changed_by_user_id INTEGER  -- Кто реально меняет статус
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
     v_old_status VARCHAR;
-    v_user_exists BOOLEAN;
 BEGIN
-    -- Проверяем существование пользователя
-    SELECT EXISTS(SELECT 1 FROM users WHERE user_id = p_user_id) INTO v_user_exists;
-    IF NOT v_user_exists THEN
-        RAISE EXCEPTION 'Пользователь с ID % не найден', p_user_id;
-    END IF;
-
-    -- Проверяем существование заказа
-    IF NOT EXISTS(SELECT 1 FROM orders WHERE order_id = p_order_id) THEN
-        RAISE EXCEPTION 'Заказ с ID % не найден', p_order_id;
-    END IF;
-
     -- Получение текущего статуса
     SELECT status INTO v_old_status 
     FROM orders 
     WHERE order_id = p_order_id;
     
-    -- Проверяем, изменился ли статус
-    IF v_old_status = p_new_status THEN
-        RAISE NOTICE 'Статус заказа % уже установлен как %', p_order_id, p_new_status;
-        RETURN;
-    END IF;
-    
-    -- Обновление статуса (триггеры автоматически создадут записи)
+    -- Обновление статуса
     UPDATE orders 
     SET status = p_new_status 
     WHERE order_id = p_order_id;
     
-    -- Запись в историю статусов (теперь это делает триггер)
-    -- INSERT в order_status_history делает триггер trigger_audit_order_status
     
-    -- Аудит (делает триггер trigger_audit_orders)
+    -- Используем временную таблицу/параметр сессии
+    PERFORM set_config('app.status_changer', p_changed_by_user_id::TEXT, FALSE);
     
-    RAISE NOTICE 'Статус заказа % изменен с % на %', p_order_id, v_old_status, p_new_status;
 END;
 $$;

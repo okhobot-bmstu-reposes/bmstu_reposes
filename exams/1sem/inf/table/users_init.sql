@@ -7,3 +7,10 @@ INSERT INTO products (name, price, stock_quantity) VALUES
 ('Ноутбук', 999.99, 10),
 ('Смартфон', 499.99, 25),
 ('Наушники', 99.99, 50);
+CALL createOrder(
+    3, -- user_id покупателя
+    '[
+        {"product_id": 1, "quantity": 1},
+        {"product_id": 3, "quantity": 2}
+    ]'::JSONB
+);

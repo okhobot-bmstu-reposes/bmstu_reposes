@@ -1,16 +1,30 @@
 -- 1. Триггер для аудита изменений статусов заказов (автоматически записывается в order_status_history)
 CREATE OR REPLACE FUNCTION audit_order_status_change()
 RETURNS TRIGGER AS $$
+DECLARE
+    v_changed_by INTEGER;
+    v_setting TEXT;
 BEGIN
     IF OLD.status != NEW.status THEN
+        -- Пытаемся прочитать настройку
+        v_setting := current_setting('app.status_changer', TRUE);
+        
+        -- Определяем, кто изменил статус
+        IF v_setting ~ '^\d+$' THEN  -- Если это число
+            v_changed_by := v_setting::INTEGER;
+        ELSE
+            v_changed_by := NEW.user_id;  -- Иначе владелец заказа
+        END IF;
+        
         -- Запись в историю статусов
         INSERT INTO order_status_history (order_id, old_status, new_status, changed_by)
-        VALUES (NEW.order_id, OLD.status, NEW.status, NEW.user_id);
+        VALUES (NEW.order_id, OLD.status, NEW.status, v_changed_by);
         
-        -- Аудит изменения статуса заказа
+        -- Аудит
         INSERT INTO audit_log (entity_type, entity_id, operation, performed_by)
-        VALUES ('order', NEW.order_id, 'update', NEW.user_id);
+        VALUES ('order', NEW.order_id, 'update', v_changed_by);
     END IF;
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
