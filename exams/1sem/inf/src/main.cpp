@@ -229,7 +229,7 @@ void customer_com()
     bool run = true;
 
     while (run)
-        try
+
         {
             std::cout << "Меню покупателя:"
                       << "\n1. Создать новый заказ"
@@ -308,7 +308,7 @@ void customer_com()
             {
                 printTable(dbConn->executeQuery(
                     "SELECT history_id, order_status_history.order_id, old_status, new_status,changed_by,changed_at "
-                    "FROM order_status_history RIGHT JOIN orders ON order_status_history.order_id = orders.order_id "
+                    "FROM order_status_history INNER JOIN orders ON order_status_history.order_id = orders.order_id "
                     "WHERE orders.user_id=3;"));
                 break;
             }
@@ -319,10 +319,7 @@ void customer_com()
             }
             std::cout << "done" << std::endl;
         }
-        catch (const std::exception &e)
-        {
-            std::cerr << (std::string("Ошибка: ") + e.what()) << std::endl;
-        }
+
 }
 int main()
 {
@@ -331,24 +328,29 @@ int main()
     std::setlocale(LC_ALL, "ru_RU.UTF-8");
     std::locale::global(std::locale("C"));
 
-    std::cout << "Пожалуйста, выберите свою роль:\n1. Войти как Администратор\n2. Войти как Менеджер\n3. Войти как Покупатель\n4. Выход " << std::endl;
 
     int com;
-    std::cin >> com;
-    switch (com)
+    bool run = true;
+    while (run)
     {
-    case 1:
-        admin_com();
-        break;
-    case 2:
-        manager_com();
-        break;
-    case 3:
-        customer_com();
-        break;
+        std::cout << "Пожалуйста, выберите свою роль:\n1. Войти как Администратор\n2. Войти как Менеджер\n3. Войти как Покупатель\n4. Выход " << std::endl;
+        std::cin >> com;
+        switch (com)
+        {
+        case 1:
+            admin_com();
+            break;
+        case 2:
+            manager_com();
+            break;
+        case 3:
+            customer_com();
+            break;
 
-    default:
-        break;
+        default:
+            run = false;
+            break;
+        }
     }
 
     return 0;
