@@ -12,9 +12,17 @@ public:
     {
         return "{\"product_id\": " + std::to_string(product_id) + ", \"quantity\": " + std::to_string(quantity) + "}";
     }
+    std::string getString()
+    {
+        return "product_id: " + std::to_string(product_id) + "; quantity: " + std::to_string(quantity)+ "; price: " + std::to_string(price)+";";
+    }
     float getPrice()
     {
         return price;
+    }
+    unsigned int getQuantity()
+    {
+        return quantity;
     }
 
 private:
@@ -28,16 +36,21 @@ class Order
     std::vector<std::shared_ptr<OrderItem>> orderItems;
 
 public:
+    void addOrderItem(std::shared_ptr<OrderItem> item) { orderItems.push_back(item); }
+    void removeOrderItem(unsigned int index) { orderItems.erase(orderItems.begin() + index); }
+    void printOrder()
+    {
+        for (int i = 0; i < orderItems.size(); i++)
+            std::cout<<orderItems[i]->getString()<<std::endl;
+    }
     int getTotalPrice()
     {
         return std::accumulate(orderItems.begin(), orderItems.end(), 0,
                                [](int total, const std::shared_ptr<OrderItem> &item)
                                {
-                                   return total + item->getPrice();
+                                   return total + item->getPrice()*item->getQuantity();
                                });
     }
-    void addOrderItem(std::shared_ptr<OrderItem> item) { orderItems.push_back(item); }
-    void removeOrderItem(unsigned int index) { orderItems.erase(orderItems.begin() + index); }
     std::string makeJSON()
     {
         std::string json = "[\n";

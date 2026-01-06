@@ -18,4 +18,12 @@ public:
     {
         dbConn->executeNonQuery("UPDATE products SET stock_quantity=" + std::to_string(new_stock_quantity) + " WHERE product_id=" + std::to_string(id) + ";");
     }
+    void updateOrderStatus(int id, std::string new_status)
+    {
+        std::string old_status = getOrderStatus(id);
+        if ((new_status == "pending" || new_status == "complited") && (old_status == "pending" || old_status == "complited"))
+            dbConn->executeNonQuery("CALL updateOrderStatus(" + std::to_string(id) + ", \'" + new_status + "\', 2);");
+        else
+            std::cerr << "Вы можете установить статус \"pending\" или \"complited\", если заказ имеет один из этих статусов";
+    }
 };

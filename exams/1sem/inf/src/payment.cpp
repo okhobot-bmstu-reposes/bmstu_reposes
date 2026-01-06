@@ -1,12 +1,12 @@
 #include <payment.hpp>
-
+#include <cmath>
 bool CreditPayment::pay()
 {
     float isum;
     std::cout << "The payment method is selected: CreditPayment" << std::endl;
     std::cout << "Confirm the cost of the payment: " << sum << std::endl;
     std::cin >> isum;
-    if (isum != sum)
+    if (std::round(isum*100) != std::round(sum*100))
     {
         std::cerr << "the entered amount does not match the expected amount" << std::endl;
         return false;
@@ -19,7 +19,7 @@ bool CashPayment::pay()
     std::cout << "The payment method is selected: CashPayment" << std::endl;
     std::cout << "Confirm the cost of the payment: " << sum << std::endl;
     std::cin >> isum;
-    if (isum != sum)
+    if (std::round(isum*100) != std::round(sum*100))
     {
         std::cerr << "the entered amount does not match the expected amount" << std::endl;
         return false;
@@ -32,7 +32,7 @@ bool FPS::pay()
     std::cout << "The payment method is selected: FPS" << std::endl;
     std::cout << "Confirm the cost of the payment: " << sum << std::endl;
     std::cin >> isum;
-    if (isum != sum)
+    if (std::round(isum*100) != std::round(sum*100))
     {
         std::cerr << "the entered amount does not match the expected amount" << std::endl;
         return false;

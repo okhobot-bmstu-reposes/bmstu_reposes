@@ -17,14 +17,15 @@ RETURNS DECIMAL AS $$
 $$ LANGUAGE SQL;
 
 -- Функция для проверки возможности возврата заказа
-CREATE OR REPLACE FUNCTION canReturnOrder(order_id INTEGER)
+CREATE OR REPLACE FUNCTION canReturnOrder(order_id INTEGER, user_id INTEGER)
 RETURNS BOOLEAN AS $$
 DECLARE
     order_status VARCHAR;
     order_date TIMESTAMP;
+	order_user INTEGER;
 BEGIN
-    SELECT status, order_date INTO order_status, order_date FROM orders WHERE order_id = $1;
-    RETURN order_status = 'completed' AND order_date >= (CURRENT_DATE - INTERVAL '30 days');
+    SELECT orders.status, orders.order_date, orders.user_id INTO order_status, order_date, order_user FROM orders WHERE orders.order_id = $1;
+    RETURN order_status = 'completed' AND order_date >= (CURRENT_DATE - INTERVAL '30 days') AND order_user = user_id;
 END;
 $$ LANGUAGE plpgsql;
 
