@@ -13,7 +13,7 @@ public:
     void createOrder() { orders.push_back(std::make_shared<Order>()); }
     void viewOrderStatus(int orderId)
     {
-        std::cout<<dbConn->executeQuery("SELECT getOrderStatus(" + std::to_string(orderId) + ")")[0]["getOrderStatus"].as<std::string>()<<std::endl;
+        std::cout << dbConn->executeQuery("SELECT getOrderStatus(" + std::to_string(orderId) + ")")[0]["getOrderStatus"].as<std::string>() << std::endl;
     }
     void cancelOrder(int orderId)
     {
@@ -23,18 +23,17 @@ public:
     {
         return dbConn->executeQuery("SELECT getOrderStatus(" + std::to_string(orderId) + ")")[0]["getOrderStatus"].as<std::string>();
     }
-    void viewOrders()
+    virtual void viewOrders()
     {
-        for(int i=0;i<orders.size();i++)
+        for (int i = 0; i < orders.size(); i++)
         {
-            std::cout<<"Индекс заказа: "<<i<<std::endl;
+            std::cout << "Индекс заказа: " << i << std::endl;
             orders[i]->printOrder();
-            std::cout<<"---------------"<<i<<std::endl;
+            std::cout << "---------------" << std::endl;
         }
-
     }
 
-    User(std::shared_ptr<DatabaseConnection> a_dbConn) { dbConn = a_dbConn;}
+    User(std::shared_ptr<DatabaseConnection> a_dbConn) { dbConn = a_dbConn; }
 
 protected:
     std::string name, email, role, password_hash;

@@ -11,7 +11,7 @@ protected:
 
 public:
     PaymentStrategy() { sum = 0; }
-    PaymentStrategy(float sum) :sum(sum) {}
+    PaymentStrategy(float sum) : sum(sum) {}
     virtual bool pay() = 0;
 };
 

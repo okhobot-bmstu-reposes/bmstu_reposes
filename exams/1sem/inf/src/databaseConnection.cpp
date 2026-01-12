@@ -12,12 +12,12 @@ DatabaseConnection::DatabaseConnection(const std::string &connectionString)
         conn = std::make_unique<pqxx::connection>(connectionString);
         if (!conn->is_open())
         {
-            std::cerr<<("Не удалось подключиться к базе данных");
+            std::cerr << ("Не удалось подключиться к базе данных");
         }
     }
     catch (const std::exception &e)
     {
-        std::cerr<<(std::string("Ошибка подключения: ") + e.what());
+        std::cerr << (std::string("Ошибка подключения: ") + e.what());
     }
 }
 
@@ -38,7 +38,7 @@ pqxx::result DatabaseConnection::executeQuery(const std::string &sql)
     }
     catch (const std::exception &e)
     {
-        std::cerr<<(std::string("Ошибка запроса: ") + e.what())<<std::endl;
+        std::cerr << (std::string("Ошибка запроса: ") + e.what()) << std::endl;
         rollbackTransaction();
     }
 
@@ -56,7 +56,7 @@ void DatabaseConnection::executeNonQuery(const std::string &sql)
     }
     catch (const std::exception &e)
     {
-        std::cerr<<(std::string("Ошибка выполнения: ") + e.what())<<std::endl;
+        std::cerr << (std::string("Ошибка выполнения: ") + e.what()) << std::endl;
         rollbackTransaction();
     }
 }
@@ -66,7 +66,7 @@ void DatabaseConnection::beginTransaction()
 {
     if (transaction)
     {
-        std::cerr<<("Транзакция уже начата");
+        std::cerr << ("Транзакция уже начата");
     }
     transaction = std::make_unique<pqxx::work>(*conn);
 }
@@ -76,7 +76,7 @@ void DatabaseConnection::commitTransaction()
 {
     if (!transaction)
     {
-        std::cerr<<("Нет активной транзакции");
+        std::cerr << ("Нет активной транзакции");
     }
     transaction->commit();
     transaction.reset();
@@ -87,7 +87,7 @@ void DatabaseConnection::rollbackTransaction()
 {
     if (!transaction)
     {
-        std::cerr<<("Нет активной транзакции");
+        std::cerr << ("Нет активной транзакции");
     }
     transaction->abort();
     transaction.reset();

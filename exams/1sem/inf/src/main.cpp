@@ -75,7 +75,7 @@ void admin_com()
             }
             case 4:
             {
-                user.viewAllOrders();
+                user.viewOrders();
                 break;
             }
             case 5:
@@ -122,7 +122,7 @@ void admin_com()
             case 9:
             {
                 auto history = dbConn->executeQuery("SELECT generateCSVReport(1);");
-                std::ofstream fout("history.csv");
+                std::ofstream fout("reports/audit_report.csv");
                 fout << history[0]["generateCSVReport"].as<std::string>();
                 fout.close();
                 break;
@@ -230,96 +230,95 @@ void customer_com()
 
     while (run)
 
+    {
+        std::cout << "Меню покупателя:"
+                  << "\n1. Создать новый заказ"
+                  << "\n2. Добавить товар в заказ"
+                  << "\n3. Удалить товар из заказа"
+                  << "\n4. Просмотр моих заказов"
+                  << "\n5. Просмотр статуса заказа"
+                  << "\n6. Оплатить заказ"
+                  << "\n7. Оформить возврат заказа"
+                  << "\n8. Просмотр истории статусов заказа"
+                  << "\n9. Выход" << std::endl;
+        int com;
+        std::cin >> com;
+        switch (com)
         {
-            std::cout << "Меню покупателя:"
-                      << "\n1. Создать новый заказ"
-                      << "\n2. Добавить товар в заказ"
-                      << "\n3. Удалить товар из заказа"
-                      << "\n4. Просмотр моих заказов"
-                      << "\n5. Просмотр статуса заказа"
-                      << "\n6. Оплатить заказ"
-                      << "\n7. Оформить возврат заказа"
-                      << "\n8. Просмотр истории статусов заказа"
-                      << "\n9. Выход" << std::endl;
-            int com;
-            std::cin >> com;
-            switch (com)
-            {
-            case 1:
-            {
-                user.createOrder();
-                break;
-            }
-            case 2:
-            {
-                unsigned int index, quantity;
-                int p_id;
-                std::cout << "Введите индекс заказа, id товара и его количество" << std::endl;
-                std::cin >> index >> p_id >> quantity;
-                user.addToOrder(index, p_id, quantity);
-                break;
-            }
-            case 3:
-            {
-                unsigned int index;
-                int p_id;
-                std::cout << "Введите индекс заказа и id товара" << std::endl;
-                std::cin >> index >> p_id;
-                user.removeFromOrder(index, p_id);
-                break;
-            }
-            case 4:
-            {
-                std::cout << "Неоплаченные заказы:" << std::endl;
-                user.viewOrders();
-                std::cout << std::endl
-                          << "Оплаченные заказы:" << std::endl;
-                printTable(dbConn->executeQuery("SELECT * FROM orders WHERE user_id = 3"));
-                break;
-            }
-            case 5:
-            {
-                int id;
-                std::cout << "Введите id заказа" << std::endl;
-                std::cin >> id;
-                user.viewOrderStatus(id);
-                break;
-            }
-            case 6:
-            {
-                int index;
-                std::cout << "Введите индекс заказа" << std::endl;
-                std::cin >> index;
-                user.makePayment(index);
-                break;
-            }
-            case 7:
-            {
-                int id;
-                std::cout << "Введите id заказа" << std::endl;
-                std::cin >> id;
-                if (dbConn->executeQuery("SELECT canReturnOrder(" + std::to_string(id) + ",3);")[0]["canReturnOrder"].as<bool>())
-                    dbConn->executeNonQuery("CALL updateOrderStatus(" + std::to_string(id) + ", \'returned\', 1);");
-                else
-                    std::cerr << "Возврат этого заказа недоступен" << std::endl;
-                break;
-            }
-            case 8:
-            {
-                printTable(dbConn->executeQuery(
-                    "SELECT history_id, order_status_history.order_id, old_status, new_status,changed_by,changed_at "
-                    "FROM order_status_history INNER JOIN orders ON order_status_history.order_id = orders.order_id "
-                    "WHERE orders.user_id=3;"));
-                break;
-            }
-
-            default:
-                run = false;
-                break;
-            }
-            std::cout << "done" << std::endl;
+        case 1:
+        {
+            user.createOrder();
+            break;
+        }
+        case 2:
+        {
+            unsigned int index, quantity;
+            int p_id;
+            std::cout << "Введите индекс заказа, id товара и его количество" << std::endl;
+            std::cin >> index >> p_id >> quantity;
+            user.addToOrder(index, p_id, quantity);
+            break;
+        }
+        case 3:
+        {
+            unsigned int index;
+            int p_id;
+            std::cout << "Введите индекс заказа и id товара" << std::endl;
+            std::cin >> index >> p_id;
+            user.removeFromOrder(index, p_id);
+            break;
+        }
+        case 4:
+        {
+            std::cout << "Неоплаченные заказы:" << std::endl;
+            user.viewOrders();
+            std::cout << std::endl
+                      << "Оплаченные заказы:" << std::endl;
+            printTable(dbConn->executeQuery("SELECT * FROM orders WHERE user_id = 3"));
+            break;
+        }
+        case 5:
+        {
+            int id;
+            std::cout << "Введите id заказа" << std::endl;
+            std::cin >> id;
+            user.viewOrderStatus(id);
+            break;
+        }
+        case 6:
+        {
+            int index;
+            std::cout << "Введите индекс заказа" << std::endl;
+            std::cin >> index;
+            user.makePayment(index);
+            break;
+        }
+        case 7:
+        {
+            int id;
+            std::cout << "Введите id заказа" << std::endl;
+            std::cin >> id;
+            if (dbConn->executeQuery("SELECT canReturnOrder(" + std::to_string(id) + ",3);")[0]["canReturnOrder"].as<bool>())
+                dbConn->executeNonQuery("CALL updateOrderStatus(" + std::to_string(id) + ", \'returned\', 1);");
+            else
+                std::cerr << "Возврат этого заказа недоступен" << std::endl;
+            break;
+        }
+        case 8:
+        {
+            printTable(dbConn->executeQuery(
+                "SELECT history_id, order_status_history.order_id, old_status, new_status,changed_by,changed_at "
+                "FROM order_status_history INNER JOIN orders ON order_status_history.order_id = orders.order_id "
+                "WHERE orders.user_id=3;"));
+            break;
         }
 
+        default:
+            run = false;
+            break;
+        }
+        std::cout << "done" << std::endl;
+    }
 }
 int main()
 {
@@ -327,7 +326,6 @@ int main()
     SetConsoleCP(CP_UTF8);
     std::setlocale(LC_ALL, "ru_RU.UTF-8");
     std::locale::global(std::locale("C"));
-
 
     int com;
     bool run = true;

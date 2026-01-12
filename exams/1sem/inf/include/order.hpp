@@ -14,7 +14,7 @@ public:
     }
     std::string getString()
     {
-        return "product_id: " + std::to_string(product_id) + "; quantity: " + std::to_string(quantity)+ "; price: " + std::to_string(price)+";";
+        return "product_id: " + std::to_string(product_id) + "; quantity: " + std::to_string(quantity) + "; price: " + std::to_string(price) + ";";
     }
     float getPrice()
     {
@@ -41,14 +41,14 @@ public:
     void printOrder()
     {
         for (int i = 0; i < orderItems.size(); i++)
-            std::cout<<orderItems[i]->getString()<<std::endl;
+            std::cout << orderItems[i]->getString() << std::endl;
     }
     int getTotalPrice()
     {
         return std::accumulate(orderItems.begin(), orderItems.end(), 0,
                                [](int total, const std::shared_ptr<OrderItem> &item)
                                {
-                                   return total + item->getPrice()*item->getQuantity();
+                                   return total + item->getPrice() * item->getQuantity();
                                });
     }
     std::string makeJSON()

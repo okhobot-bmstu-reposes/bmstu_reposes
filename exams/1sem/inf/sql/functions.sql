@@ -37,7 +37,7 @@ RETURNS TABLE(
     changed_at TIMESTAMP,
     changed_by_name VARCHAR
 ) AS $$
-    SELECT 
+    SELECT
         osh.old_status,
         osh.new_status,
         osh.changed_at,
@@ -56,7 +56,7 @@ RETURNS TABLE(
     operation VARCHAR,
     performed_at TIMESTAMP
 ) AS $$
-    SELECT 
+    SELECT
         entity_type,
         entity_id,
         operation,
@@ -76,15 +76,15 @@ BEGIN
     -- Проверка админа
     SELECT role = 'admin' INTO v_is_admin
     FROM users WHERE user_id = p_admin_user_id;
-    
+
     IF NOT v_is_admin THEN
         RAISE EXCEPTION 'Доступ запрещен. Только администраторы могут генерировать отчеты.';
     END IF;
-    
-    -- Формируем CSV (используем отдельные подзапросы чтобы избежать дублирования)
-    SELECT 
+
+    -- Формируем CSV
+    SELECT
         'user_id,user_name,user_role,total_orders,total_spent,status_changes,audit_actions' || E'\n' ||
-        
+
         STRING_AGG(
             user_id::TEXT || ',' ||
             '"' || REPLACE(user_name, '"', '""') || '",' ||
@@ -95,29 +95,29 @@ BEGIN
             audit_actions::TEXT,
             E'\n'
         ORDER BY total_spent DESC)
-        
+
     INTO v_csv_content
-    
+
     FROM (
-        SELECT 
+        SELECT
             u.user_id,
             u.name as user_name,
             u.role as user_role,
-            
+
             -- Заказы пользователя
             (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.user_id) as total_orders,
             (SELECT COALESCE(SUM(total_price), 0) FROM orders o WHERE o.user_id = u.user_id) as total_spent,
-            
+
             -- Изменения статусов (где пользователь был инициатором)
             (SELECT COUNT(*) FROM order_status_history osh WHERE osh.changed_by = u.user_id) as status_changes,
-            
+
             -- Действия в аудите
             (SELECT COUNT(*) FROM audit_log al WHERE al.performed_by = u.user_id) as audit_actions
-            
+
         FROM users u
     ) as report_data;
-    
-    
+
+
     RETURN v_csv_content;
 END;
 $$ LANGUAGE plpgsql;

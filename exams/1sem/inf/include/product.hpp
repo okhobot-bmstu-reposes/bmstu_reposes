@@ -14,9 +14,10 @@ public:
     }
     Product()
     {
-        std::cout << "Введите количество на складе, цену и имя(без пробелов) продукта"<<std::endl;
-        std::cin>>stock_quantity>>price>>name;
+        std::cout << "Введите количество на складе, цену и имя(без пробелов) продукта" << std::endl;
+        std::cin >> stock_quantity >> price >> name;
     }
+
     int getId() { return product_id; }
     unsigned int getStockQuantity() { return stock_quantity; }
     float getPrice() { return price; }
